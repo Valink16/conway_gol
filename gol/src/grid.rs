@@ -3,8 +3,9 @@ use crate::State;
 
 // A grid representing the plane where the simulation takes place
 // The data is stored as a 1D array of booleans, since each cell can only be either dead or alive 
+// The outer rim of the grid should be never evaluated to reduce program complexity, calling get_neighbors on one of the cells in the outer rim will result in an error
 pub struct Grid {
-    cells: Vec::<bool>,
+    cells: Vec::<(bool, bool)>,
     n_ops: [isize; 8], // This array stores the operations to apply to a given index to get it's 8 neighbors
     pub w: isize,
     pub h: isize,
@@ -13,7 +14,7 @@ pub struct Grid {
 impl Grid {
     // Initiates the grid
     pub fn new(w: usize, h: usize) -> Grid {
-        let cells = vec![false; w * h]; 
+        let cells = vec![(false, false); w * h];
         let w = w as isize;
         let h = h as isize;
         let n_ops = [
@@ -36,9 +37,15 @@ impl Grid {
     }
 
     pub fn get_cell(&self, i: usize) -> State {
-        match self.cells[i] {
+        match self.cells[i].0 {
             true => State::Alive,
             false => State::Dead
+        }
+    }
+
+    pub fn update_cells(&mut self) {
+        for i in 0..self.cells.len() {
+            self.cells[i].1 = !self.cells[i].0;
         }
     }
 
