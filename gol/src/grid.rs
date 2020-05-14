@@ -5,8 +5,8 @@ use crate::State;
 // The data is stored as a 1D array of booleans, since each cell can only be either dead or alive 
 // The outer rim of the grid should be never evaluated to reduce program complexity, calling get_neighbors on one of the cells in the outer rim will result in an error
 pub struct Grid {
-    cells: Vec::<(bool, bool)>,
-    n_ops: [isize; 8], // This array stores the operations to apply to a given index to get it's 8 neighbors
+    pub cells: Vec::<(bool, bool)>,
+    pub n_ops: [isize; 8], // This array stores the operations to apply to a given index to get it's 8 neighbors
     pub w: isize,
     pub h: isize,
 }
@@ -36,26 +36,38 @@ impl Grid {
         }
     }
 
-    pub fn get_cell(&self, i: usize) -> State {
-        match self.cells[i].0 {
-            true => State::Alive,
-            false => State::Dead
-        }
-    }
-
     pub fn update_cells(&mut self) {
-        for i in 0..self.cells.len() {
-            self.cells[i].1 = !self.cells[i].0;
+        let mut n = [0 as usize; 8];
+        for i in 0..self.cells.len() as isize {
+            match self.get_neighbors(i, &mut n) {
+                Some(_) => {
+                    for _n in n.iter() {
+                        self.cells[*_n].0 = self.cells[*_n].1;
+                    }
+                },
+                None => ()
+            };
         }
     }
 
     // Returns the index of the cell at (x, y)
-    pub fn get_index(&self, x: usize, y: usize) -> usize {
-        y * self.w as usize + x
+    pub fn get_index(&self, x: isize, y: isize) -> isize {
+        y * self.w + x
     }
 
-    // Get an iterator over all the neighbors at (x, y)
-    pub fn get_neighbors(&self, i: usize) -> Result<neigh::NeighborIter, neigh::NeighborError> {
-        neigh::NeighborIter::new(&self.n_ops, i as isize, self.w, self.h)
+    // Returns an array over the indexes of all the neighbors at (x, y)
+    pub fn get_neighbors(&self, index: isize, n: &mut [usize; 8]) -> Option<()> {
+        let x = index % self.w;
+        let y = index / self.w;
+
+        if x == 0 || x == self.w - 1 || y == 0 || y == self.h - 1 {
+            return None;
+        }
+
+        for i in 0..self.n_ops.len() {
+            n[i] = (index + self.n_ops[i]) as usize;
+        }
+
+        Some(())
     }
 }

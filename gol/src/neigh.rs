@@ -1,21 +1,4 @@
 use std::iter::Iterator;
-use std::fmt;
-use std::error::Error;
-
-// Simple error for NeighborIter
-#[derive(Debug)]
-pub struct NeighborError;
-impl fmt::Display for NeighborError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Cells in the outer border of the grid are not supposed to be used")
-    }
-}
-
-impl Error for NeighborError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
-}
 
 // Iterator over neighbors of a cell
 // Returns the indexes for each neighbor
@@ -26,15 +9,15 @@ pub struct NeighborIter<'a> {
 }
 
 impl<'a> NeighborIter<'a> {
-    pub fn new(ops: &'a[isize; 8], index: isize, w: isize, h: isize) -> Result<NeighborIter, NeighborError> {
+    pub fn new(ops: &'a[isize; 8], index: isize, w: isize, h: isize) -> Option<NeighborIter> {
         let x = index % w;
         let y = index / w;
 
         if x == 0 || x == w - 1 || y == 0 || y == h - 1 {
-            return Err(NeighborError);
+            return None;
         }
 
-        Ok(NeighborIter {
+        Some(NeighborIter {
             ops,
             index,
             cn: 0
