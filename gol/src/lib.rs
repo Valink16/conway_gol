@@ -38,3 +38,4 @@ mod tests {
 
 pub mod grid;
 pub mod neigh;
+pub mod render;

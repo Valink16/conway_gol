@@ -1,5 +1,6 @@
 /target/
 /Cargo.lock
+/SDL2.dll
 
 /gol/target/
 /gol/Cargo.lock

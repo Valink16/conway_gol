@@ -5,7 +5,7 @@ use crate::neigh;
 // The outer rim of the grid should be never evaluated to reduce program complexity, calling get_neighbors on one of the cells in the outer rim will result in an error
 pub struct Grid {
     pub cells: Vec::<(bool, bool)>,
-    pub n_ops: [isize; 8], // This array stores the operations to apply to a given index to get it's 8 neighbors
+    pub n_ops: [isize; 8], // This array stores the operations to apply to a given index to get it's 8 neighboring indexes
     pub w: isize,
     pub h: isize,
 }
