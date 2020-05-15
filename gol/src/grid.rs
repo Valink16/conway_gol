@@ -1,5 +1,4 @@
 use crate::neigh;
-use crate::State;
 
 // A grid representing the plane where the simulation takes place
 // The data is stored as a 1D array of booleans, since each cell can only be either dead or alive 

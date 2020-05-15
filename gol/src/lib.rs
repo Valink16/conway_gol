@@ -38,31 +38,3 @@ mod tests {
 
 pub mod grid;
 pub mod neigh;
-
-pub enum State {
-    Alive,
-    Dead
-}
-
-use std::fmt;
-impl fmt::Display for State {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let s = match self {
-            State::Alive => "alive",
-            State::Dead => "dead"
-        };
-        write!(f, "{}", s)
-    }
-}
-
-impl fmt::Debug for State {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let s = match self {
-            State::Alive => "1",
-            State::Dead => "0"
-        };
-        write!(f, "{}", s)
-    }
-}
-
-
