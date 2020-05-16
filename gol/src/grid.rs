@@ -1,5 +1,7 @@
 use crate::neigh;
 
+use rand;
+
 // A grid representing the plane where the simulation takes place
 // The data is stored as a 1D array of booleans, since each cell can only be either dead or alive 
 // The outer rim of the grid should be never evaluated to reduce program complexity, calling get_neighbors on one of the cells in the outer rim will result in an error
@@ -68,5 +70,13 @@ impl Grid {
         }
 
         Some(())
+    }
+
+    // Test function which randomizes the data
+    pub fn randomize(&mut self) {
+        for c in &mut self.cells {
+            let n = rand::random::<usize>();
+            c.0 = n % 2 == 0 && n % 3 == 0;
+        }
     }
 }
