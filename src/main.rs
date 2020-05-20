@@ -10,5 +10,7 @@ fn main() {
         g
     );
 
+    r.window.set_vertical_sync_enabled(true);
+
     r.render_loop();
 }

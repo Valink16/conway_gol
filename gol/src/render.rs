@@ -69,8 +69,8 @@ impl Renderer {
                 }
             }
 
-            self.g.update_cells();
             self.update_vbuffer();
+            self.g.update_cells();
     
             self.window.clear(Color::WHITE);
             self.window.draw(&self.cells_vbuffer);
@@ -79,20 +79,23 @@ impl Renderer {
         }
     }
 
-    pub fn update_vbuffer(&mut self) { // Updates self.cells_vbuffer using self.g.cells
+    pub fn update_vbuffer(&mut self) { // Updates self.cells_vbuffer using self.g.cells, you MUST call self.g.update_cells AFTER calling this one
         for i in 0..self.g.cells.len() {
             let vi = i * 4;
-            if self.g.cells[i].0 {
-                self.cells_vbuffer[vi].color = Color::BLACK;
-                self.cells_vbuffer[vi + 1].color = Color::BLACK;
-                self.cells_vbuffer[vi + 2].color = Color::BLACK;
-                self.cells_vbuffer[vi + 3].color = Color::BLACK;
-            } else {
-                self.cells_vbuffer[vi].color = Color::WHITE;
-                self.cells_vbuffer[vi + 1].color = Color::WHITE;
-                self.cells_vbuffer[vi + 2].color = Color::WHITE;
-                self.cells_vbuffer[vi + 3].color = Color::WHITE;
+            if self.g.cells[i].0 != self.g.cells[i].1 {
+                if self.g.cells[i].1 {
+                    self.cells_vbuffer[vi].color = Color::BLACK;
+                    self.cells_vbuffer[vi + 1].color = Color::BLACK;
+                    self.cells_vbuffer[vi + 2].color = Color::BLACK;
+                    self.cells_vbuffer[vi + 3].color = Color::BLACK;
+                } else {
+                    self.cells_vbuffer[vi].color = Color::WHITE;
+                    self.cells_vbuffer[vi + 1].color = Color::WHITE;
+                    self.cells_vbuffer[vi + 2].color = Color::WHITE;
+                    self.cells_vbuffer[vi + 3].color = Color::WHITE;
+                }
             }
+            
         }
     }
 

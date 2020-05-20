@@ -40,8 +40,8 @@ impl Grid {
     }
 
     pub fn update_cells(&mut self) {
-        for i in 0..self.cells.len() as usize {
-            self.cells[i].0 = self.cells[i].1;
+        for c in &mut self.cells {
+            c.0 = c.1;
         }
     }
 

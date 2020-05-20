@@ -1,7 +1,7 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use rand;
 
-use gol::{grid, neigh};
+use gol::{grid, neigh, render};
 
 const W: usize = 100;
 const H: usize = 100;
@@ -24,11 +24,9 @@ pub fn cell_repr(c: &mut Criterion) {
         })
     });
 
-    c.bench_function("bench_grid_n_iter", |b| { 
+    c.bench_function("bench_grid_update_cells", |b| { 
         b.iter(|| {
-            for c in g.cells.iter_mut() {
-                c.0 = rand::random::<bool>();
-            }
+            g.update_cells();
         })
     });
 }
@@ -52,5 +50,20 @@ pub fn rand_gen_bench(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benches, rand_gen_bench);
+pub fn vbuffer(c: &mut Criterion) {
+    let mut g = grid::Grid::new(W, H);
+    let mut r = render::Renderer::new(
+        "Renderer test", 600, 400,
+        g
+    );
+
+
+    c.bench_function("update_vbuffer", |b| { 
+        b.iter(|| {
+            r.update_vbuffer();
+        })
+    });
+}
+
+criterion_group!(benches, cell_repr);
 criterion_main!(benches);

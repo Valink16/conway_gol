@@ -12,27 +12,27 @@ mod tests {
         let mut n_buffer = [0 as usize; 8];
 
         // Upper rim check
-        for x in 0..w as isize {
-            assert_eq!(g.get_neighbors(g.get_index(x, 0), &mut n_buffer).is_none(), true);
+        for x in 0..w as i32 {
+            assert_eq!(g.get_neighbors(g.get_index(x, 0) as isize, &mut n_buffer).is_none(), true);
         }
 
         // Down rim check
-        for x in 0..w as isize {
-            assert_eq!(g.get_neighbors(g.get_index(x, h - 1), &mut n_buffer).is_none(), true);
+        for x in 0..w as i32 {
+            assert_eq!(g.get_neighbors(g.get_index(x, h as i32- 1) as isize, &mut n_buffer).is_none(), true);
         }
 
         // Left rim check
-        for y in 0..h as isize {
-            assert_eq!(g.get_neighbors(g.get_index(0, y), &mut n_buffer).is_none(), true);
+        for y in 0..h as i32 {
+            assert_eq!(g.get_neighbors(g.get_index(0, y) as isize, &mut n_buffer).is_none(), true);
         }
 
         // Right rim check
-        for y in 0..h as isize {
-            assert_eq!(g.get_neighbors(g.get_index(w - 1, y), &mut n_buffer).is_none(), true);
+        for y in 0..h as i32 {
+            assert_eq!(g.get_neighbors(g.get_index(w as i32 - 1, y) as isize, &mut n_buffer).is_none(), true);
         }
 
         // Check inside the rim
-        assert_eq!(g.get_neighbors(g.get_index(w / 2, h / 2), &mut n_buffer).is_some(), true);
+        assert_eq!(g.get_neighbors(g.get_index(w as i32 / 2, h as i32 / 2) as isize, &mut n_buffer).is_some(), true);
     }
 }
 
