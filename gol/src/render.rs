@@ -159,7 +159,7 @@ fn create_grid_vbuffer(screen_size: (u32, u32), grid_size: (u32, u32)) -> Vertex
     }
 
     for x in 0..grid_size.0 + 1 {
-        let _i = ((grid_size.1 + 1) * 2 + x * 2) as usize;
+        let _i = ((grid_size.1) * 2 + x * 2) as usize;
         arr[_i].position = Vector2f::new(x as f32 * c_w, 0.0);
         arr[_i + 1].position = Vector2f::new(x as f32 * c_w, screen_size.1 as f32);
     }
