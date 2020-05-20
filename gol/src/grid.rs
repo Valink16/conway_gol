@@ -1,3 +1,5 @@
+use std::convert::TryInto;
+
 use crate::neigh;
 
 use rand;
@@ -38,22 +40,15 @@ impl Grid {
     }
 
     pub fn update_cells(&mut self) {
-        let mut n = [0 as usize; 8];
-        for i in 0..self.cells.len() as isize {
-            match self.get_neighbors(i, &mut n) {
-                Some(_) => {
-                    for _n in n.iter() {
-                        self.cells[*_n].0 = self.cells[*_n].1;
-                    }
-                },
-                None => ()
-            };
+        for i in 0..self.cells.len() as usize {
+            self.cells[i].0 = self.cells[i].1;
         }
     }
 
     // Returns the index of the cell at (x, y)
-    pub fn get_index(&self, x: isize, y: isize) -> isize {
-        y * self.w + x
+    pub fn get_index(&self, x: i32, y: i32) -> u32 {
+        let r = y * self.w as i32 + x;
+        r.try_into().expect("Cannot convert negative coordinates")
     }
 
     // Returns an array over the indexes of all the neighbors at (x, y)

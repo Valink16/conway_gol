@@ -1,17 +1,17 @@
 use crate::grid;
 
-use sfml::graphics::RenderWindow;
-use sfml::window::Event;
-use sfml::graphics::VertexArray;
-use sfml::graphics::Color;
+use sfml::graphics::{RenderWindow, VertexArray, Color, RenderTarget, Rect};
+
 use sfml::system::Vector2f;
 
-use sfml::graphics::RenderTarget;
+use sfml::window::Event;
+use sfml::window::mouse::Button;
 
 pub struct Renderer {
     pub g: grid::Grid,
     pub window: RenderWindow,
-    cells_vbuffer: VertexArray // Vertex buffer containing all the quads representing the cells
+    cells_vbuffer: VertexArray, // Vertex buffer containing all the quads representing the cells
+    cell_size: Rect<i32>
 }
 
 impl Renderer {
@@ -27,10 +27,18 @@ impl Renderer {
 
         let cells_vbuffer = create_vbuffer(&g.cells, (w, h), (g.w as u32, g.h as u32));
         
+        let cell_size = Rect::<i32> {
+            left: 0,
+            top: 0,
+            width: (w / g.w as u32) as i32,
+            height: (h / g.h as u32) as i32
+        };
+
         Self {
             g,
             window,
-            cells_vbuffer
+            cells_vbuffer,
+            cell_size
         }
     }
 
@@ -39,11 +47,26 @@ impl Renderer {
             while let Some(e) = self.window.poll_event() {
                 match e {
                     Event::Closed => break 'running,
+                    Event::MouseButtonReleased { button, x, y } => {
+                        match button {
+                            Button::Left => {
+                                // Convert screen coordinates to grid coordinates
+                                let (gx, gy) = (
+                                    x / self.cell_size.width,
+                                    y / self.cell_size.height
+                                );
+                                let i = self.g.get_index(gx, gy) as usize;
+                                // println!("{}, {}, {}, {}, {}, {}, {}", x, y, self.cell_size.width, self.cell_size.height, gx, gy, i);
+                                self.g.cells[i].1 = !self.g.cells[i].0;
+                            }
+                            _ => ()
+                        }
+                    },
                     _ => ()
                 }
             }
 
-            self.g.randomize();
+            self.g.update_cells();
             self.update_vbuffer();
     
             self.window.clear(Color::WHITE);
@@ -53,19 +76,19 @@ impl Renderer {
     }
 
     pub fn update_vbuffer(&mut self) { // Updates self.cells_vbuffer using self.g.cells
-        for i in (0..self.cells_vbuffer.vertex_count()).step_by(4) {
-            if self.g.cells[i / 4].0 {
-                self.cells_vbuffer[i].color = Color::BLACK;
-                self.cells_vbuffer[i + 1].color = Color::BLACK;
-                self.cells_vbuffer[i + 2].color = Color::BLACK;
-                self.cells_vbuffer[i + 3].color = Color::BLACK;
+        for i in 0..self.g.cells.len() {
+            let vi = i * 4;
+            if self.g.cells[i].0 {
+                self.cells_vbuffer[vi].color = Color::BLACK;
+                self.cells_vbuffer[vi + 1].color = Color::BLACK;
+                self.cells_vbuffer[vi + 2].color = Color::BLACK;
+                self.cells_vbuffer[vi + 3].color = Color::BLACK;
             } else {
-                self.cells_vbuffer[i].color = Color::WHITE;
-                self.cells_vbuffer[i + 1].color = Color::WHITE;
-                self.cells_vbuffer[i + 2].color = Color::WHITE;
-                self.cells_vbuffer[i + 3].color = Color::WHITE;
+                self.cells_vbuffer[vi].color = Color::WHITE;
+                self.cells_vbuffer[vi + 1].color = Color::WHITE;
+                self.cells_vbuffer[vi + 2].color = Color::WHITE;
+                self.cells_vbuffer[vi + 3].color = Color::WHITE;
             }
-        
         }
     }
 
@@ -89,8 +112,11 @@ fn create_vbuffer(data: &Vec<(bool, bool)>, screen_size: (u32, u32), grid_size: 
     let c_h = (screen_size.1 / grid_size.1) as f32;
 
     for i in 0..data.len() as u32 {
-        let x = (i % grid_size.0) as f32 * c_w;
-        let y = (i / grid_size.1) as f32 * c_h;
+        let gx = (i % grid_size.0) as f32;
+        let gy = (i / grid_size.0) as f32;
+
+        let x = gx * c_w;
+        let y = gy * c_h;
         let _i = (i * 4) as usize;
 
         // Setting up the 4 points of the quad representing cell at data[i]
@@ -99,12 +125,11 @@ fn create_vbuffer(data: &Vec<(bool, bool)>, screen_size: (u32, u32), grid_size: 
         arr[_i + 2].position = Vector2f::new(x + c_w, y + c_h);
         arr[_i + 3].position = Vector2f::new(x, y + c_h);
         
-        let c: Color;
-        if data[i as usize].0 { // The cell is black if true
-            c = Color::BLACK;
+        let c = if data[i as usize].0 { // The cell is black if true
+            Color::BLACK
         } else { // or white
-            c = Color::WHITE;
-        }
+            Color::WHITE
+        };
 
         arr[_i].color = c;
         arr[_i + 1].color = c;
