@@ -12,7 +12,7 @@ pub struct Renderer {
     pub window: RenderWindow,
     cells_vbuffer: VertexArray, // Vertex buffer containing all the quads representing the cells
     grid_vbuffer: VertexArray, // Outline of the grid
-    cell_size: Rect<i32>
+    cell_size: Rect<f32>
 }
 
 impl Renderer {
@@ -29,11 +29,11 @@ impl Renderer {
         let cells_vbuffer = create_vbuffer(&g.cells, (w, h), (g.w as u32, g.h as u32));
         let grid_vbuffer = create_grid_vbuffer((w, h), (g.w as u32, g.h as u32));
 
-        let cell_size = Rect::<i32> {
-            left: 0,
-            top: 0,
-            width: (w / g.w as u32) as i32,
-            height: (h / g.h as u32) as i32
+        let cell_size = Rect::<f32> {
+            left: 0.0,
+            top: 0.0,
+            width: w as f32 / g.w as f32,
+            height: h as f32 / g.h as f32
         };
 
         Self {
@@ -55,8 +55,8 @@ impl Renderer {
                             Button::Left => {
                                 // Convert screen coordinates to grid coordinates
                                 let (gx, gy) = (
-                                    x / self.cell_size.width,
-                                    y / self.cell_size.height
+                                    (x as f32 / self.cell_size.width) as i32,
+                                    (y as f32 / self.cell_size.height) as i32
                                 );
                                 let i = self.g.get_index(gx, gy) as usize;
                                 // println!("{}, {}, {}, {}, {}, {}, {}", x, y, self.cell_size.width, self.cell_size.height, gx, gy, i);
@@ -73,8 +73,8 @@ impl Renderer {
             self.g.update_cells();
     
             self.window.clear(Color::WHITE);
-            self.window.draw(&self.cells_vbuffer);
             self.window.draw(&self.grid_vbuffer);
+            self.window.draw(&self.cells_vbuffer);
             self.window.display();
         }
     }
@@ -89,10 +89,10 @@ impl Renderer {
                     self.cells_vbuffer[vi + 2].color = Color::BLACK;
                     self.cells_vbuffer[vi + 3].color = Color::BLACK;
                 } else {
-                    self.cells_vbuffer[vi].color = Color::WHITE;
-                    self.cells_vbuffer[vi + 1].color = Color::WHITE;
-                    self.cells_vbuffer[vi + 2].color = Color::WHITE;
-                    self.cells_vbuffer[vi + 3].color = Color::WHITE;
+                    self.cells_vbuffer[vi].color = Color::TRANSPARENT;
+                    self.cells_vbuffer[vi + 2].color = Color::TRANSPARENT;
+                    self.cells_vbuffer[vi + 1].color = Color::TRANSPARENT;
+                    self.cells_vbuffer[vi + 3].color = Color::TRANSPARENT;
                 }
             }
             
@@ -115,8 +115,8 @@ impl Renderer {
 // Creates and return a vertex buffer representing a 1D (bool, bool) vector as a grid of BLACK or WHITE rectangles
 fn create_vbuffer(data: &Vec<(bool, bool)>, screen_size: (u32, u32), grid_size: (u32, u32)) -> VertexArray {
     let mut arr = VertexArray::new(sfml::graphics::PrimitiveType::Quads, data.len() * 4); // Multiply by 4 because these are quads
-    let c_w = (screen_size.0 / grid_size.0) as f32;
-    let c_h = (screen_size.1 / grid_size.1) as f32;
+    let c_w = screen_size.0 as f32 / grid_size.0 as f32;
+    let c_h = screen_size.1 as f32 / grid_size.1 as f32;
 
     for i in 0..data.len() as u32 {
         let gx = (i % grid_size.0) as f32;
@@ -135,7 +135,7 @@ fn create_vbuffer(data: &Vec<(bool, bool)>, screen_size: (u32, u32), grid_size: 
         let c = if data[i as usize].0 { // The cell is black if true
             Color::BLACK
         } else { // or white
-            Color::WHITE
+            Color::TRANSPARENT
         };
 
         arr[_i].color = c;
@@ -152,8 +152,8 @@ fn create_vbuffer(data: &Vec<(bool, bool)>, screen_size: (u32, u32), grid_size: 
 // Creates and returns line vertex buffer representing a grid
 fn create_grid_vbuffer(screen_size: (u32, u32), grid_size: (u32, u32)) -> VertexArray {
     let mut arr = VertexArray::new(sfml::graphics::PrimitiveType::Lines, ((grid_size.0 + 1) * (grid_size.1 + 1)) as usize);
-    let c_w = (screen_size.0 / grid_size.0) as f32;
-    let c_h = (screen_size.1 / grid_size.1) as f32;
+    let c_w = screen_size.0 as f32 / grid_size.0 as f32;
+    let c_h = screen_size.1 as f32 / grid_size.1 as f32;
 
     for y in 0..grid_size.1 + 1 {
         let _i = (y * 2) as usize;
@@ -168,7 +168,7 @@ fn create_grid_vbuffer(screen_size: (u32, u32), grid_size: (u32, u32)) -> Vertex
     }
 
     for i in 0..arr.vertex_count() {
-        arr[i].color = Color::BLACK;
+        arr[i].color = Color::rgb(127, 127, 127);
     }
 
     arr
