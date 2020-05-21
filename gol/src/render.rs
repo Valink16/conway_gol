@@ -4,7 +4,7 @@ use sfml::graphics::{RenderWindow, VertexArray, Color, RenderTarget, Rect};
 
 use sfml::system::Vector2f;
 
-use sfml::window::Event;
+use sfml::window::{Event, Key};
 use sfml::window::mouse::Button;
 
 pub struct Renderer {
@@ -19,12 +19,14 @@ impl Renderer {
     // Initiates SFML and sets up a new window to render the grid on
     pub fn new(name: &str, w: u32, h: u32, g: grid::Grid) -> Self {
         // SFML setup
-        let window = RenderWindow::new(
+        let mut window = RenderWindow::new(
             sfml::window::VideoMode::from((w, h)), 
             name,
             sfml::window::Style::CLOSE,
             &Default::default()
         );
+
+        window.set_framerate_limit(60);
 
         let cells_vbuffer = create_vbuffer(&g.cells, (w, h), (g.w as u32, g.h as u32));
         let grid_vbuffer = create_grid_vbuffer((w, h), (g.w as u32, g.h as u32));
@@ -46,7 +48,10 @@ impl Renderer {
     }
 
     pub fn render_loop(&mut self) {
+        let mut frame = 0;
+        let mut pause = false;
         'running: loop {
+            frame += 1;
             while let Some(e) = self.window.poll_event() {
                 match e {
                     Event::Closed => break 'running,
@@ -58,15 +63,25 @@ impl Renderer {
                                     (x as f32 / self.cell_size.width) as i32,
                                     (y as f32 / self.cell_size.height) as i32
                                 );
-                                let i = self.g.get_index(gx, gy) as usize;
+                                let i = self.g.get_index(gx, gy);
                                 // println!("{}, {}, {}, {}, {}, {}, {}", x, y, self.cell_size.width, self.cell_size.height, gx, gy, i);
                                 self.g.cells[i].1 = !self.g.cells[i].0;
                             }
                             _ => ()
                         }
                     },
+                    Event::KeyReleased { code, .. } => {
+                        match code {
+                            Key::Space => pause ^= true,
+                            _ => ()
+                        }
+                    },
                     _ => ()
                 }
+            }
+
+            if frame % 60 == 0 && !pause {
+                self.g.step();
             }
 
             self.update_vbuffer();
@@ -95,7 +110,6 @@ impl Renderer {
                     self.cells_vbuffer[vi + 3].color = Color::TRANSPARENT;
                 }
             }
-            
         }
     }
 
